@@ -1,57 +1,64 @@
-// List of random objects
+// List of objects to use in the game
 const objects = ["Rock", "Book", "Scissors", "Folder", "Paper", "Pencil", "Phone", "Apple", "Chair"];
 
 // Select DOM elements
 const prompt = document.getElementById("prompt");
-const circleText = document.getElementById("circle-text");
 const cooldownTimer = document.getElementById("cooldown-timer");
-const status = document.getElementById("status");
 const gridCells = document.querySelectorAll(".grid-cell"); // Select all grid cells
 
 // Game variables
-let round = 1; // Start from "1"
-const totalRounds = Infinity; // Infinite rounds
-let cooldown = 20; // Cooldown in seconds
+let cooldown = 30; // 30 seconds per round
 let cooldownInterval = null;
 let gameActive = true; // To prevent extra clicks during cooldown
-let selectedCell = null; // Track selected cell
+let correctPrompt = ""; // Track the current prompt to match against
 
-// Generate a random prompt
-function getRandomPrompt() {
+// Fill grid with random objects (this is the initial grid setup)
+function fillGrid() {
+    const gridItems = [];
+    const randomIndex = Math.floor(Math.random() * objects.length);
+    gridItems.push(objects[randomIndex]); // Add the correct prompt
+
+    // Add random objects to fill the grid
+    while (gridItems.length < gridCells.length) {
+        const randomObject = objects[Math.floor(Math.random() * objects.length)];
+        if (!gridItems.includes(randomObject)) {
+            gridItems.push(randomObject);
+        }
+    }
+
+    // Shuffle grid items to randomize their order
+    gridItems.sort(() => Math.random() - 0.5);
+
+    gridCells.forEach((cell, index) => {
+        const object = gridItems[index];
+        cell.textContent = object;
+        cell.style.backgroundColor = "white"; // Reset background color
+        cell.classList.remove("green"); // Remove any previous green class
+        cell.classList.remove("red"); // Remove any previous red class
+        cell.addEventListener('click', () => handleCellClick(cell, object)); // Attach click handler
+    });
+}
+
+// Get a random object from the available list
+function getRandomObject() {
     const randomIndex = Math.floor(Math.random() * objects.length);
     return objects[randomIndex];
 }
 
-// Fill grid with randomised objects
-function fillGrid() {
-    // Shuffle the objects array to randomize the grid
-    const shuffledObjects = [...objects].sort(() => Math.random() - 0.5);
-    
-    // Loop through grid cells and assign random objects
-    gridCells.forEach((cell, index) => {
-        cell.textContent = shuffledObjects[index] || '';
-        cell.classList.remove('hidden'); // Make sure the cell is visible before selection
-        cell.style.backgroundColor = "white"; // Reset color if needed
-        cell.addEventListener('click', () => handleCellClick(cell, shuffledObjects[index]));
-    });
-}
-
 // Start the cooldown timer
 function startCooldown() {
-    cooldown = 20; // Reset cooldown to 20 seconds
+    cooldown = 30; // Reset cooldown to 30 seconds
     cooldownTimer.textContent = `${cooldown}s`;
 
-    // Clear any previous interval
-    clearInterval(cooldownInterval);
+    clearInterval(cooldownInterval); // Clear any previous interval
 
-    // Start the countdown
     cooldownInterval = setInterval(() => {
         cooldown--;
         cooldownTimer.textContent = `${cooldown}s`;
 
         if (cooldown <= 0) {
             clearInterval(cooldownInterval); // Stop countdown
-            handleMiss(); // Automatically progress to the next round
+            handleMiss(); // Automatically progress to the next round if time runs out
         }
     }, 1000); // Decrease cooldown every second
 }
@@ -60,31 +67,26 @@ function startCooldown() {
 function handleCellClick(cell, object) {
     if (!gameActive) return; // Prevent clicks if the game isn't active
 
-    // Check if the clicked cell matches the current prompt
-    if (object === prompt.textContent) {
-        cell.style.backgroundColor = "lightgreen"; // Mark as selected
-        cell.classList.add('hidden'); // Hide selected box
+    // Compare the current prompt to the object text, ensuring case insensitivity
+    if (object.toLowerCase() === correctPrompt.toLowerCase() && !cell.classList.contains('green')) {
+        cell.style.backgroundColor = "lightgreen"; // Mark the cell as correct (green)
+        cell.classList.add('green'); // Add green class to prevent further changes
 
-        round++; // Increment the round
-        circleText.textContent = `${round}`; // Show current round number
+        // After a correct answer, change the prompt to a new random object
+        correctPrompt = getRandomObject();
+        prompt.textContent = correctPrompt; // Update the prompt with new object
 
-        // Update the prompt with fade-in effect
-        setTimeout(() => {
-            prompt.textContent = getRandomPrompt(); // Change prompt after selection
-            prompt.style.animation = "fadeIn 1s ease-in-out"; // Apply fade-in animation
-            fillGrid(); // Reset grid after prompt change
-            startCooldown(); // Restart cooldown timer
-        }, 1000); // Wait 1 second before changing the prompt
+        // Fill the grid with new answers and shuffle
+        fillGrid();
+        
+        // Restart the cooldown timer for the next round
+        startCooldown();
     } else {
-        // Incorrect selection, trigger a 5-second delay before fade-out
-        setTimeout(() => {
-            prompt.style.animation = "fadeOut 1s ease-in-out"; // Apply fade-out effect
-        }, 5000); // Wait 5 seconds before starting fade-out
-
-        cell.style.backgroundColor = "red"; // Incorrect selection
+        // Incorrect selection
+        cell.style.backgroundColor = "red"; // Mark the cell as incorrect (red)
 
         setTimeout(() => {
-            cell.style.backgroundColor = "white"; // Reset cell color after some time
+            cell.style.backgroundColor = "white"; // Reset color after some time
         }, 500); // Reset color after 500ms
     }
 }
@@ -93,32 +95,31 @@ function handleCellClick(cell, object) {
 function handleMiss() {
     if (!gameActive) return; // Prevent actions if the game isn't active
 
-    round++;
-    circleText.textContent = `${round}`;
-
-    // Update the prompt and restart the cooldown
-    prompt.textContent = getRandomPrompt();
+    // Reset the game and start with a new prompt
+    correctPrompt = getRandomObject();
+    prompt.textContent = correctPrompt; // Update correct prompt
     fillGrid(); // Reset grid after prompt change
     startCooldown(); // Restart cooldown timer
 }
 
-// End the game
-function endGame() {
-    gameActive = false; // Disable interactions
-    clearInterval(cooldownInterval); // Stop cooldown timer
-    cooldownTimer.textContent = ""; // Clear the timer display
+// Reset the game after a round ends
+function resetGame() {
+    correctPrompt = getRandomObject(); // Set new prompt
+    prompt.textContent = correctPrompt; // Update correct prompt
+    fillGrid(); // Reset grid with new random objects
+    startCooldown(); // Restart the timer for the new round
 }
 
 // Initialise the game
 function initGame() {
-    prompt.textContent = getRandomPrompt(); // Set initial prompt
-    circleText.textContent = `${round}`; // Reset round
+    correctPrompt = getRandomObject(); // Set initial prompt
+    prompt.textContent = correctPrompt; // Set initial prompt text
     gameActive = true; // Activate the game
-    status.textContent = ""; // Clear status message
-    selectedCell = null; // Reset selected cell tracker
     fillGrid(); // Fill grid with randomised objects
     startCooldown(); // Start initial cooldown
 }
 
 // Start the game
 initGame();
+
+
