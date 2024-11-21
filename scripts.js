@@ -9,12 +9,10 @@ const status = document.getElementById("status");
 const gridCells = document.querySelectorAll(".grid-cell"); // Select all grid cells
 
 // Game variables
-let round = 1; // Start from "1/5"
-const totalRounds = 5;
+let round = 1; // Start from "1/∞"
 let cooldown = 20; // Cooldown in seconds
 let cooldownInterval = null;
 let gameActive = true; // To prevent extra clicks during cooldown
-let selectedCell = null; // Track selected cell
 
 // Generate a random prompt
 function getRandomPrompt() {
@@ -58,23 +56,15 @@ function startCooldown() {
 
 // Handle player clicking on the grid cells
 function handleCellClick(cell, object) {
-    if (!gameActive || selectedCell !== null) return; // Prevent clicks if the game isn't active or a cell is already selected
+    if (!gameActive) return; // Prevent clicks if the game isn't active
 
     // Check if the clicked cell matches the current prompt
     if (object === prompt.textContent) {
-        selectedCell = cell; // Track selected cell
         cell.style.backgroundColor = "lightgreen"; // Mark as selected
         cell.classList.add('hidden'); // Hide selected box
 
         round++; // Increment the round
-        circleText.textContent = `${round}/${totalRounds}`;
-
-        // Check for win condition
-        if (round > totalRounds) {
-            status.textContent = "You Win! 🎉";
-            endGame();
-            return;
-        }
+        circleText.textContent = `${round}`; // Show current round number
 
         // Update the prompt and restart the cooldown
         setTimeout(() => {
@@ -92,15 +82,8 @@ function handleCellClick(cell, object) {
 function handleMiss() {
     if (!gameActive) return; // Prevent actions if the game isn't active
 
-    round++;
-    circleText.textContent = `${round}/${totalRounds}`;
-
-    // Check for win condition
-    if (round > totalRounds) {
-        status.textContent = "You Lose! 😞";
-        endGame();
-        return;
-    }
+    round++; // Increment the round
+    circleText.textContent = `${round}`; // Show current round number
 
     // Update the prompt and restart the cooldown
     prompt.textContent = getRandomPrompt();
@@ -118,14 +101,12 @@ function endGame() {
 // Initialise the game
 function initGame() {
     prompt.textContent = getRandomPrompt(); // Set initial prompt
-    circleText.textContent = `${round}/${totalRounds}`; // Reset round
+    circleText.textContent = `${round}`; // Reset round
     gameActive = true; // Activate the game
     status.textContent = ""; // Clear status message
-    selectedCell = null; // Reset selected cell tracker
     fillGrid(); // Fill grid with randomised objects
     startCooldown(); // Start initial cooldown
 }
 
 // Start the game
 initGame();
-
