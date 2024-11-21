@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <h1 id="prompt">Apple</h1> <!-- Randomised word -->
+        <div id="square">
+            <!-- Grid of cells -->
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+            <div class="grid-cell"></div>
+        </div> <!-- Grid container -->
+        <div id="circle-counter">
+            <div id="counter-section">
+                <span id="circle-text">1/5</span>
+                <span id="cooldown-timer">20s</span> <!-- Countdown timer -->
+            </div>
+            <div id="circle" onclick="handleClick()"></div> <!-- Player click area -->
+        </div>
+        <p id="status"></p> <!-- Game status -->
+    </div>
+    <script src="scripts.js"></script>
+</body>
+</html>
+
