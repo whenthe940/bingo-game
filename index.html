@@ -7,9 +7,6 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Audio element for background music -->
-    <audio id="bgm" src="bgm_music.mp3" autoplay loop></audio> <!-- Music starts playing automatically and loops -->
-
     <div id="game-container">
         <h1 id="prompt">Apple</h1> <!-- Randomised word -->
         <div id="square">
@@ -33,6 +30,14 @@
         </div>
         <p id="status"></p> <!-- Game status -->
     </div>
+
+    <!-- Background Music -->
+    <audio autoplay loop>
+        <source src="bgm_music.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
     <script src="scripts.js"></script>
 </body>
 </html>
+
